@@ -28,7 +28,6 @@ jobs:
           payload="$( jq -n \
             --arg repoUrl "${GITHUB_REPOSITORY}" \
             --arg prId "${prId}" \
-            --arg prBranch "${prBranch}" \
             --arg prCommitId "${prCommitId}" \
             --arg commentsUrl "${commentsUrl}" \
             '{ref: "empty-branch", inputs: {repoUrl: $repoUrl, prId: $prId, prCommitId: $prCommitId, commentsUrl: $commentsUrl}}' \
