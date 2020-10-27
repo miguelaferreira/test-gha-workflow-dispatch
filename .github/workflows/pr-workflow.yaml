@@ -1,0 +1,39 @@
+name: Workflow for PRs
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dispatch_workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          PAT: ${{ secrets.BOT_PAT }}
+        run: |
+          prCommitId="$( jq -r .pull_request.head.sha "${GITHUB_EVENT_PATH}" )"
+          prBranch="$( jq -r .pull_request.head.ref "${GITHUB_EVENT_PATH}" )"
+
+          echo "GITHUB_SERVER_URL = ${GITHUB_SERVER_URL}"
+          echo "GITHUB_API_URL = ${GITHUB_API_URL}"
+          echo "GITHUB_REPOSITORY = ${GITHUB_REPOSITORY}"
+          echo "GITHUB_EVENT_PATH = ${GITHUB_EVENT_PATH}"
+          echo "GITHUB_SHA = ${GITHUB_SHA}"
+          echo "prCommitId = ${prCommitId}"
+          echo "prBranch = ${prBranch}"
+
+          echo "==> trigger build"
+          prId="$( jq -r .pull_request.id "${GITHUB_EVENT_PATH}" )"
+          prBranch="$( jq -r .pull_request.head.ref "${GITHUB_EVENT_PATH}" )"
+          commentsUrl="$( jq -r .pull_request.comments_url "${GITHUB_EVENT_PATH}" )"
+          payload="$( jq -n \
+            --arg repoUrl "${GITHUB_REPOSITORY}" \
+            --arg prId "${prId}" \
+            --arg prBranch "${prBranch}" \
+            --arg prCommitId "${prCommitId}" \
+            --arg commentsUrl "${commentsUrl}" \
+            '{ref: $prBranch, inputs: {repoUrl: $repoUrl, prId: $prId, prCommitId: $prCommitId, commentsUrl: $commentsUrl}}' \
+          )"
+
+          echo "==> DEBUG payload = ${payload}"
+          curl --header "Authorization: token ${PAT}" --header "Content-Type: application/json" --data "${payload}" ${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/workflows/remote-workflow.yaml/dispatches
