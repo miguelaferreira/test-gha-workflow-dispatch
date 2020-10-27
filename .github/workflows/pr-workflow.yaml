@@ -31,7 +31,7 @@ jobs:
             --arg prBranch "${prBranch}" \
             --arg prCommitId "${prCommitId}" \
             --arg commentsUrl "${commentsUrl}" \
-            '{ref: "does-not-exist", inputs: {repoUrl: $repoUrl, prId: $prId, prCommitId: $prCommitId, commentsUrl: $commentsUrl}}' \
+            '{ref: "empty-branch", inputs: {repoUrl: $repoUrl, prId: $prId, prCommitId: $prCommitId, commentsUrl: $commentsUrl}}' \
           )"
 
           echo "==> DEBUG payload = ${payload}"
