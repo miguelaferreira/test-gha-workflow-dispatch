@@ -24,14 +24,13 @@ jobs:
 
           echo "==> trigger build"
           prId="$( jq -r .pull_request.id "${GITHUB_EVENT_PATH}" )"
-          prBranch="$( jq -r .pull_request.head.ref "${GITHUB_EVENT_PATH}" )"
           commentsUrl="$( jq -r .pull_request.comments_url "${GITHUB_EVENT_PATH}" )"
           payload="$( jq -n \
             --arg repoUrl "${GITHUB_REPOSITORY}" \
             --arg prId "${prId}" \
-            --arg prBranch "${prBranch}" \
             --arg prCommitId "${prCommitId}" \
             --arg commentsUrl "${commentsUrl}" \
+            --arg prBranch "${prBranch}" \
             '{ref: $prBranch, inputs: {repoUrl: $repoUrl, prId: $prId, prCommitId: $prCommitId, commentsUrl: $commentsUrl}}' \
           )"
 
