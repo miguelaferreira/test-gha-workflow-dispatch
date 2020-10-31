@@ -30,7 +30,8 @@ jobs:
             --arg prId "${prId}" \
             --arg prCommitId "${prCommitId}" \
             --arg commentsUrl "${commentsUrl}" \
-            '{ref: "test-workflow-dispatch-pr", inputs: {repoUrl: $repoUrl, prId: $prId, prCommitId: $prCommitId, commentsUrl: $commentsUrl}}' \
+            --arg prBranch "${prBranch}" \
+            '{ref: $prBranch, inputs: {repoUrl: $repoUrl, prId: $prId, prCommitId: $prCommitId, commentsUrl: $commentsUrl}}' \
           )"
 
           echo "==> DEBUG payload = ${payload}"
