@@ -1,0 +1,47 @@
+name: Deploy Function
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  prepare_deployment:
+    name: Read deployment manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read deployment manifest
+        id: deployment_manifest
+        run: |
+          set -x
+          manifest="$( printf "${body}"  | grep "###" | sed -e "s/###//" )"
+          release="$( grep "release" <<<${manifest} | sed -e "s/release[:]*//" | xargs )"
+          environments="$( grep "environment" <<<${manifest} | sed -e "s/environment[s]*[:]*//" -e "s/,//g" | xargs )"
+          environments_list=""
+          for e in $(echo $environments); do environments_list="${environments_list}- $e%0A"; done
+          # '%0A' is the escape sequence for \n that peter-evans/create-or-update-comment action understands
+
+          manifest="$( jq -c -n --arg release "${release}" --arg environments "${environments}" '{release: $release | rtrimstr("\r"), environments: $environments | split(" ")}' )"
+
+          echo ::set-output name=release::"${release}"
+          echo ::set-output name=environments::"${environments}"
+          echo ::set-output name=environments-list::"${environments_list}"
+          echo ::set-output name=manifest::"${manifest}"
+        env:
+          body: ${{ github.event.issue.body }}
+      - name: Confirmation comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Will deploy release **${{ steps.deployment_manifest.outputs.release }}** to environments:
+            ${{ steps.deployment_manifest.outputs.environments-list }}
+
+            <details>
+              <summary>Show Manifest</summary>
+
+              ```json
+              ${{ steps.deployment_manifest.outputs.manifest }}
+              ```
+            </details>
+
+            Comment "confirm deployment" to have it deployed.
