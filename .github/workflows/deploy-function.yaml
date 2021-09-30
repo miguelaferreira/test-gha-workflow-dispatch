@@ -20,7 +20,7 @@ jobs:
           for e in $(echo $environments); do environments_list="${environments_list}- $e%0A"; done
           # '%0A' is the escape sequence for \n that peter-evans/create-or-update-comment action understands
 
-          manifest="$( jq -c -n --arg release "${release}" --arg environments "${environments}" '{release: $release | rtrimstr("\r"), environments: $environments | split(" ") | rtrimstr("\r")}' )"
+          manifest="$( jq -c -n --arg release "${release}" --arg environments "${environments}" '{release: $release | rtrimstr("\r"), environments: $environments | split(" ") | map(rtrimstr("\r"))}' )"
 
           echo ::set-output name=release::"${release}"
           echo ::set-output name=environments::"${environments}"
